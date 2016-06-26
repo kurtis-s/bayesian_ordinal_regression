@@ -18,7 +18,10 @@ get_pi_from_gamma2 <- function(gamma) {
     diff(t(gamma))
 }
 
-get_pi_from_delta_beta <- function(delta, beta, X) {
+get_pi_from_coefs <- function(coefs, X) {
+    beta <- coefs$beta
+    delta <- coefs$delta
+
     eta <- get_eta(beta, X)
     linear_part <- get_linear_part(delta, eta)
     gamma <- get_gamma_from_linear_part(linear_part)
