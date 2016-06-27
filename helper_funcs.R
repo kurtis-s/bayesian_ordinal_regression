@@ -1,5 +1,5 @@
-get_eta <- function(beta, X) {
-    return(X %*% beta)
+get_eta <- function(beta) {
+    return(Xobs %*% beta)
 }
 
 get_pi_from_gamma <- function(gamma) {
@@ -18,16 +18,16 @@ get_pi_from_gamma2 <- function(gamma) {
     diff(t(gamma))
 }
 
-get_pi_from_coefs <- function(coefs, X) {
+get_pi_from_coefs <- function(coefs) {
     beta <- coefs$beta
     delta <- coefs$delta
 
-    eta <- get_eta(beta, X)
+    eta <- get_eta(beta)
     linear_part <- get_linear_part(delta, eta)
     gamma <- get_gamma_from_linear_part(linear_part)
-    pi <- get_pi_from_gamma(gamma)
+    pi_probs <- get_pi_from_gamma(gamma)
 
-    return(pi)
+    return(pi_probs)
 }
 
 get_gamma_from_linear_part <- function(linear_part) {
@@ -44,4 +44,22 @@ get_linear_part <- function(delta, eta) {
     linear_part <- sapply(delta, function(deltaj) deltaj - eta)
 
     return(linear_part)
+}
+
+gen_obs <- function(coefs) {
+    beta <- coefs$beta
+    delta <- coefs$delta
+    eta <- get_eta(beta)
+    # column 1 is delta1 - eta, column 2 is delta2 - eta, etc.
+    linear_part <- get_linear_part(delta, eta)
+    gamma <- get_gamma_from_linear_part(linear_part)
+    pi_probs <- get_pi_from_gamma(gamma)
+
+    Y <- vector(length=n_obs)
+    for(i in 1:n_obs) {
+        category <- rmultinom(1, 1, prob=pi_probs[i,])
+        Y[i] <- which(category==1)
+    }
+
+    return(Y)
 }
